@@ -1,53 +1,73 @@
-# L.A.M.A.Medellin.Front
+# React + TypeScript + Vite
 
-## Caso de Negocio
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-### Problema
-  - El capítulo L.A.M.A. Medellín necesita una forma eficiente y segura de gestionar la información de sus miembros.
-  - La información actual está dispersa y difícil de acceder, lo que dificulta la comunicación y la toma de decisiones.
+Currently, two official plugins are available:
 
-### Solución 
-  - Desarrollar una aplicación web centralizada que permita almacenar, gestionar y acceder a la información de los miembros de forma segura y fácil.
-  - Implementar funcionalidades de búsqueda, filtrado, exportación e importación de datos.
-  - Integrar autenticación de redes sociales para facilitar el acceso a la aplicación.https://github.com/usuario-dev/reporte-horas-extra)
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-### Beneficios
-  - Mejora la eficiencia y la productividad del capítulo.
-  - Centraliza la información y facilita el acceso a ella.
-  - Mejora la comunicación entre los miembros.
-  - Fortalece la seguridad de la información.
-  - Permite generar informes y estadísticas sobre los miembros.
+## React Compiler
 
-### Usuarios 
-  - Miembros del capítulo L.A.M.A. Medellín.
-  - Administradores del capítulo.
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-### React con TypeScript
-  - Librería de JavaScript popular y flexible para construir interfaces de usuario.
-  - TypeScript para un código más seguro y mantenible.
-  - Utilización de librerias de UI como Material UI, o Tailwind para agilizar el proceso de desarrollo.
+## Expanding the ESLint configuration
 
-### Autenticación
-  - Azure Active Directory B2C: Para la autenticación de usuarios y la integración con redes sociales (Facebook, Google, etc.).
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
-### Desarrollo del Frontend (React): (Alternativa)
-  - Crear un nuevo proyecto de React con TypeScript utilizando create-react-app.
-  - Diseñar la interfaz de usuario con componentes reutilizables.
-  - Utilizar axios o fetch para consumir los endpoints de la API.
-  - Implementar la lógica de autentificación de usuario.
-  - Integrar los botones de login de redes sociales.
+```js
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
 
-### Integración y Pruebas
-  - Integrar el frontend con el backend y probar todas las funcionalidades.
-  - Realizar pruebas unitarias y de integración.
-  - Probar la autentificación de redes sociales.
+      // Remove tseslint.configs.recommended and replace with this
+      tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      tseslint.configs.stylisticTypeChecked,
 
-### Autenticación de Redes Sociales
-  - Configurar Azure Active Directory B2C con los proveedores de identidad de redes sociales (Facebook, Google, etc.).
-  - Integrar los botones de inicio de sesión de redes sociales en el frontend.
-  - Manejar los tokens de autenticación y los datos de usuario devueltos por Azure AD B2C.
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+```
 
-### Puntos Clave con React
-  - React es una librería muy popular, por lo que encontrarás una gran cantidad de recursos y una comunidad activa.
-  - TypeScript añade una capa de seguridad y facilita el mantenimiento del código.
-  - La utilización de librerias de componentes como Material UI, o tailwindcss, acelera el proceso de diseño de la interfaz de usuario.
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
+
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+```
