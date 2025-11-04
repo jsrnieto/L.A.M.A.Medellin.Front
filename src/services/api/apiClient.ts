@@ -44,9 +44,11 @@ class ApiClient {
       (error) => {
         // Handle common errors
         if (error.response?.status === 401) {
-          // Unauthorized - redirect to login
+          // Unauthorized - clear token
+          // Note: Redirect to login should be handled by components using React Router
           localStorage.removeItem('accessToken');
-          window.location.href = '/login';
+          // Dispatch a custom event that can be caught by the auth context
+          window.dispatchEvent(new CustomEvent('unauthorized'));
         }
         return Promise.reject(error);
       }

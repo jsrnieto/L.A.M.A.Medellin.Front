@@ -38,7 +38,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     };
 
+    // Handle unauthorized events from API client
+    const handleUnauthorized = () => {
+      setUser(null);
+      localStorage.removeItem('accessToken');
+    };
+
+    window.addEventListener('unauthorized', handleUnauthorized);
     checkAuth();
+
+    return () => {
+      window.removeEventListener('unauthorized', handleUnauthorized);
+    };
   }, []);
 
   const login = async (email: string, password: string): Promise<void> => {

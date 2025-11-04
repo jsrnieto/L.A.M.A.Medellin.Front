@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { memberService } from '../../services/api';
 import type { Member } from '../../types';
 import { Button } from '../../components/common/Button';
+import { MESSAGES } from '../../config/messages';
 
 export const MembersPage: React.FC = () => {
   const [members, setMembers] = useState<Member[]>([]);
@@ -19,8 +20,8 @@ export const MembersPage: React.FC = () => {
       const response = await memberService.getMembers(1, 10);
       setMembers(response.items);
     } catch (err) {
-      console.error('Failed to fetch members:', err);
-      setError('No se pudieron cargar los miembros. Por favor, conecte la API.');
+      console.error(MESSAGES.MEMBERS_FETCH_ERROR, err);
+      setError(MESSAGES.MEMBERS_LOAD_ERROR);
       // Set mock data for demonstration
       setMembers([
         {
@@ -49,7 +50,7 @@ export const MembersPage: React.FC = () => {
     return (
       <div className="text-center py-12">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-        <p className="mt-4 text-gray-600">Cargando miembros...</p>
+        <p className="mt-4 text-gray-600">{MESSAGES.MEMBERS_LOADING}</p>
       </div>
     );
   }
@@ -136,7 +137,7 @@ export const MembersPage: React.FC = () => {
 
         {members.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-500">No hay miembros registrados</p>
+            <p className="text-gray-500">{MESSAGES.MEMBERS_NO_DATA}</p>
           </div>
         )}
       </div>

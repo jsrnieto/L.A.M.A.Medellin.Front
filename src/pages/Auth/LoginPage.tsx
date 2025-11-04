@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
 import { ROUTES } from '../../config/constants';
+import { MESSAGES } from '../../config/messages';
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -23,7 +24,7 @@ export const LoginPage: React.FC = () => {
       await login(email, password);
       navigate(ROUTES.HOME);
     } catch (err) {
-      setError('Failed to login. Please check your credentials.');
+      setError(MESSAGES.LOGIN_ERROR);
       console.error(err);
     } finally {
       setIsLoading(false);
