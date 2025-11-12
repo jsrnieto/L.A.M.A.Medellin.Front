@@ -34,10 +34,10 @@ const Home = () => {
       path: "/members",
     },
     {
-      title: "Reportes",
-      description: "Accede a reportes y análisis del equipo",
+      title: "Estadísticas",
+      description: "Accede a estadísticas y análisis del equipo",
       icon: BarChart,
-      path: "/reports",
+      path: "/statistics",
     },
     {
       title: "Documentos",

@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 import { InteractionStatus } from "@azure/msal-browser";
 import { loginRequest } from "./auth/authConfig";
 import IndexRouter from "./routes";
-import Unauthorized from "./components/pages/Unauthorized";
+import Login from "./components/pages/Login";
 
 const queryClient = new QueryClient();
 
@@ -58,7 +58,7 @@ function App() {
             <RouterProvider router={IndexRouter} />
           </AuthenticatedTemplate>
           <UnauthenticatedTemplate>
-            <Unauthorized />
+            <Login />
           </UnauthenticatedTemplate>
         </SnackbarProvider>
       </QueryClientProvider>
