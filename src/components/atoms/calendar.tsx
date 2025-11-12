@@ -1,19 +1,12 @@
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { DateCalendar, type DateCalendarProps } from "@mui/x-date-pickers/DateCalendar";
-import {
-  LocalizationProvider,
-  type LocalizationProviderProps,
-} from "@mui/x-date-pickers/LocalizationProvider";
+import { DateCalendar, type DateCalendarProps } from "@mui/x-date-pickers";
 
-export type CalendarProps<TDate = Date> = DateCalendarProps<TDate> & {
-  localizationProps?: Omit<LocalizationProviderProps<TDate>, "dateAdapter" | "children">;
+export type CalendarProps = DateCalendarProps & {
+  localizationProps?: Record<string, unknown>;
 };
 
-function Calendar<TDate = Date>({ localizationProps, ...props }: CalendarProps<TDate>) {
+function Calendar({ localizationProps, ...props }: CalendarProps) {
   return (
-    <LocalizationProvider dateAdapter={AdapterDateFns} {...localizationProps}>
-      <DateCalendar {...props} />
-    </LocalizationProvider>
+    <DateCalendar {...props} />
   );
 }
 Calendar.displayName = "Calendar";

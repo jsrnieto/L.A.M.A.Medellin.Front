@@ -1,47 +1,109 @@
 import * as React from "react";
-import { Slot } from "@radix-ui/react-slot";
-import { cva, type VariantProps } from "class-variance-authority";
+import MuiButton, { type ButtonProps as MuiButtonProps } from "@mui/material/Button";
+import type { SxProps, Theme } from "@mui/material/styles";
 
-import { cn } from "@/lib/utils";
+type CustomVariant = "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+type CustomSize = "default" | "sm" | "lg" | "icon";
 
-const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+type ButtonProps = Omit<MuiButtonProps, "variant" | "color" | "size"> & {
+  variant?: CustomVariant;
+  size?: CustomSize;
+};
+
+const variantConfig: Record<
+  CustomVariant,
   {
-    variants: {
-      variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
+    muiVariant: MuiButtonProps["variant"];
+    color?: MuiButtonProps["color"];
+    sx?: SxProps<Theme>;
+  }
+> = {
+  default: { muiVariant: "contained", color: "primary" },
+  destructive: {
+    muiVariant: "contained",
+    color: "error",
+  },
+  outline: {
+    muiVariant: "outlined",
+    color: "primary",
+  },
+  secondary: { muiVariant: "contained", color: "secondary" },
+  ghost: {
+    muiVariant: "text",
+    color: "primary",
+    sx: {
+      backgroundColor: "transparent",
+      "&:hover": {
+        backgroundColor: "action.hover",
       },
-      size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8",
-        icon: "h-10 w-10",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
     },
   },
-);
+  link: {
+    muiVariant: "text",
+    color: "primary",
+    sx: {
+      textDecoration: "underline",
+      textUnderlineOffset: "4px",
+      "&:hover": {
+        textDecoration: "underline",
+      },
+    },
+  },
+};
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
-  asChild?: boolean;
-}
+const sizeMap: Record<CustomSize, MuiButtonProps["size"]> = {
+  default: "medium",
+  sm: "small",
+  lg: "large",
+  icon: "medium",
+};
+
+const sizeStyles: Record<CustomSize, SxProps<Theme>> = {
+  default: {
+    minHeight: 40,
+    px: 2,
+  },
+  sm: {
+    minHeight: 36,
+    px: 1.5,
+  },
+  lg: {
+    minHeight: 48,
+    px: 3,
+  },
+  icon: {
+    width: 40,
+    minWidth: 40,
+    height: 40,
+    px: 0,
+  },
+};
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button";
-    return <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />;
+  ({ variant = "default", size = "default", sx, ...props }, ref) => {
+    const { muiVariant, color } = variantConfig[variant];
+    const combinedSx: SxProps<Theme> = [
+      {
+        borderRadius: 2,
+        textTransform: "none",
+        fontWeight: 600,
+        gap: 1,
+      }
+    ];
+
+    return (
+      <MuiButton
+        ref={ref}
+        variant={muiVariant}
+        color={color}
+        size={sizeMap[size]}
+        sx={combinedSx}
+        {...props}
+      />
+    );
   },
 );
 Button.displayName = "Button";
 
-export { Button, buttonVariants };
+export { Button };
+export type { ButtonProps };
