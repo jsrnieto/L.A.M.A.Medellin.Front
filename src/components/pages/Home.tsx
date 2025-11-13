@@ -14,14 +14,11 @@ const Home = () => {
     const email = localStorage.getItem("userEmail");
     const role = localStorage.getItem("userRole") as "admin" | "miembro";
 
-    if (!email) {
-      navigate("/");
-      return;
+    if (email) {
+      setUserEmail(email);
+      setUserRole(role);
     }
-
-    setUserEmail(email);
-    setUserRole(role);
-  }, [navigate]);
+  }, []);
 
   const userName = userEmail.split("@")[0];
 

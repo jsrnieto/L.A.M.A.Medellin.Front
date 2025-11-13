@@ -1,44 +1,113 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, Navigate } from "react-router-dom";
 import {
   Box,
   Card,
   CardContent,
-  TextField,
   Button,
   Typography,
   Container,
-  InputAdornment,
-  IconButton,
+  CircularProgress,
 } from "@mui/material";
-import { Visibility, VisibilityOff, Business } from "@mui/icons-material";
+import { Business, Microsoft } from "@mui/icons-material";
 import { useSnackbar } from "notistack";
+import { useMsal, useIsAuthenticated } from "@azure/msal-react";
+import { loginRequest } from "../../auth/authConfig";
+import { InteractionStatus } from "@azure/msal-browser";
 
 const Login = () => {
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const { instance, inProgress } = useMsal();
+  const isAuthenticated = useIsAuthenticated();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!email || !password) {
-      enqueueSnackbar("Por favor completa todos los campos", {
-        variant: "warning",
-      });
-      return;
+  // Redirect to home if already authenticated
+  useEffect(() => {
+    if (inProgress === InteractionStatus.None && isAuthenticated) {
+      navigate("/", { replace: true });
     }
+  }, [isAuthenticated, inProgress, navigate]);
 
-    const userRole = email === "admin@empresa.com" ? "admin" : "miembro";
-    localStorage.setItem("userEmail", email);
-    localStorage.setItem("userRole", userRole);
+  // Show loading while checking authentication status
+  if (inProgress !== InteractionStatus.None) {
+    return (
+      <Box
+        sx={{
+          minHeight: "100dvh",
+          minWidth: "100dvw",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "linear-gradient(135deg, #0078D4 0%, #50A7E8 100%)",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
 
-    enqueueSnackbar(`¡Bienvenido! Sesión iniciada como ${userRole}`, {
-      variant: "success",
-    });
-    navigate("/home");
+  // Redirect if authenticated
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+
+  const handleMicrosoftLogin = async () => {
+    try {
+      setIsLoading(true);
+
+      // Trigger MSAL login popup
+      const response = await instance.loginPopup({
+        ...loginRequest,
+        prompt: "select_account", // Force account selection
+      });
+
+      // Get user information from the response
+      const account = response.account;
+      if (account) {
+        // Extract email from account (username is typically the UPN/email)
+        const email =
+          account.username || account.name || account.homeAccountId || "";
+
+        // Determine user role based on email (you can customize this logic)
+        const userRole =
+          email === "admin@empresa.com" || email.toLowerCase().includes("admin")
+            ? "admin"
+            : "miembro";
+
+        // Store user information in localStorage for compatibility with existing app
+        localStorage.setItem("userEmail", email);
+        localStorage.setItem("userRole", userRole);
+        localStorage.setItem("msalAccount", JSON.stringify(account));
+
+        enqueueSnackbar(`¡Bienvenido! Sesión iniciada como ${userRole}`, {
+          variant: "success",
+        });
+
+        navigate("/");
+      }
+    } catch (error: any) {
+      console.error("Login error:", error);
+
+      // Handle user cancellation
+      if (
+        error.errorCode === "user_cancelled" ||
+        error.errorCode === "consent_required"
+      ) {
+        enqueueSnackbar("Inicio de sesión cancelado", {
+          variant: "info",
+        });
+      } else {
+        enqueueSnackbar(
+          "Error al iniciar sesión. Por favor intenta nuevamente.",
+          {
+            variant: "error",
+          }
+        );
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -70,70 +139,54 @@ const Login = () => {
               </Typography>
             </Box>
 
-            <form onSubmit={handleLogin}>
-              <TextField
-                fullWidth
-                label="Correo electrónico"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                margin="normal"
-                variant="outlined"
-                placeholder="usuario@empresa.com"
-              />
-
-              <TextField
-                fullWidth
-                label="Contraseña"
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                margin="normal"
-                variant="outlined"
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={() => setShowPassword(!showPassword)}
-                        edge="end"
-                      >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-
+            <Box>
               <Button
                 fullWidth
-                type="submit"
                 variant="contained"
                 size="large"
-                sx={{ mt: 3, mb: 2 }}
+                onClick={handleMicrosoftLogin}
+                disabled={isLoading}
+                startIcon={
+                  isLoading ? (
+                    <CircularProgress size={20} color="inherit" />
+                  ) : (
+                    <Microsoft />
+                  )
+                }
+                sx={{
+                  mt: 2,
+                  mb: 2,
+                  py: 1.5,
+                  backgroundColor: "#0078D4",
+                  "&:hover": {
+                    backgroundColor: "#106EBE",
+                  },
+                }}
               >
-                Iniciar Sesión
+                {isLoading
+                  ? "Iniciando sesión..."
+                  : "Iniciar sesión con Microsoft"}
               </Button>
 
               <Box
                 sx={{
                   mt: 3,
                   p: 2,
-                  backgroundColor: "primary.light",
+                  backgroundColor: "info.light",
                   borderRadius: 2,
-                  color: "primary.contrastText",
+                  color: "info.contrastText",
                 }}
               >
-                <Typography variant="caption" display="block">
-                  <strong>Demo:</strong>
+                <Typography variant="body2" display="block" sx={{ mb: 1 }}>
+                  <strong>Autenticación segura</strong>
                 </Typography>
                 <Typography variant="caption" display="block">
-                  Admin: admin@empresa.com
-                </Typography>
-                <Typography variant="caption">
-                  Miembro: cualquier otro email
+                  Utiliza tu cuenta de Microsoft para acceder al portal
+                  empresarial. Tus credenciales son manejadas de forma segura
+                  por Microsoft Azure AD.
                 </Typography>
               </Box>
-            </form>
+            </Box>
           </CardContent>
         </Card>
       </Container>

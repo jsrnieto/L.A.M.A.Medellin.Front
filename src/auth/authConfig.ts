@@ -21,17 +21,23 @@ export const msalConfig = {
 
 // Helper to get additional scopes from environment if needed
 const getScopes = () => {
+  const defaultScopes = ["User.Read"]; // Default scope for Microsoft Graph to read user profile
+  const clientBackId = import.meta.env.VITE_CLIENT_BACK_ID ?? "";
+  const apiScope = `api://${clientBackId}/`; // API scope for backend access
   const envScopes = import.meta.env.VITE_ADDITIONAL_SCOPES;
+
   if (typeof envScopes === "string" && envScopes.length > 0) {
-    return envScopes
+    const additionalScopes = envScopes
       .split(",")
-      .map((scope) => scope.trim())
+      .map((scope) => apiScope + scope.trim())
       .filter(Boolean);
+    return [...defaultScopes, ...additionalScopes];
   }
-  return [];
+
+  return [...defaultScopes, apiScope];
 };
 
 // Ensure scopes are properly formatted as an array of strings
 export const loginRequest = {
-  scopes: getScopes(), // Default scope for Microsoft Graph
+  scopes: getScopes(),
 };

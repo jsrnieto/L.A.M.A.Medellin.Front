@@ -36,19 +36,16 @@ const Members = () => {
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
 
-  // Verificar autenticación al cargar
+  // Load user information
   useEffect(() => {
     const email = localStorage.getItem("userEmail");
     const role = localStorage.getItem("userRole") as "admin" | "miembro";
 
-    if (!email) {
-      navigate("/");
-      return;
+    if (email) {
+      setUserEmail(email);
+      setUserRole(role);
     }
-
-    setUserEmail(email);
-    setUserRole(role);
-  }, [navigate]);
+  }, []);
 
   const userName = userEmail.split("@")[0];
 

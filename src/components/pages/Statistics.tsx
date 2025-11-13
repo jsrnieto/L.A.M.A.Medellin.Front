@@ -55,22 +55,16 @@ const Statistics = () => {
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Verificar autenticación y cargar datos
+  // Load user information
   useEffect(() => {
     const email = localStorage.getItem("userEmail");
     const role = localStorage.getItem("userRole") as "admin" | "miembro";
 
-    if (!email) {
-      navigate("/");
-      return;
+    if (email) {
+      setUserEmail(email);
+      setUserRole(role);
     }
-
-    setUserEmail(email);
-    setUserRole(role);
-
-    // Cargar todos los miembros para las estadísticas
-    loadMembers();
-  }, [navigate]);
+  }, []);
 
   const loadMembers = async () => {
     setLoading(true);
@@ -91,6 +85,11 @@ const Statistics = () => {
       setLoading(false);
     }
   };
+
+  // Load members on mount
+  useEffect(() => {
+    loadMembers();
+  }, []);
 
   const userName = userEmail.split("@")[0];
 
